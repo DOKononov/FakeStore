@@ -9,7 +9,7 @@ import Foundation
 import RxSwift
 
 protocol CategoriesRouterProtocol {
-    func open(category: String)
+    func open(category: String, products: [Product])
 }
 
 final class CategoriesVM: CategoriesViewModelProtocol {
@@ -36,8 +36,6 @@ final class CategoriesVM: CategoriesViewModelProtocol {
         bind()
     }
  
-    
-    
     private func bind() {
         networkService
             .loadCategories()
@@ -47,9 +45,15 @@ final class CategoriesVM: CategoriesViewModelProtocol {
             .disposed(by: bag)
         
         categorySelected
-            .subscribe(onNext: { 
-                self.router.open(category: $0)
-                })
+            .flatMapLatest { [weak self] category -> Observable<(category: String, products: [Product])> in
+                guard let self else { return .empty() }
+                return self.networkService.load(category: category)
+                    .map { (category, $0) }
+            }
+            .subscribe(onNext: { [weak self] result in
+                guard let self else { return }
+                self.router.open(category: result.category, products: result.products)
+            })
             .disposed(by: bag)
     }
 }

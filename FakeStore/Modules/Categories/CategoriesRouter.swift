@@ -11,10 +11,9 @@ final class CategoriesRouter: CategoriesRouterProtocol {
 
     weak var root: UIViewController?
     
-    func open(category: String) {
-        let vc = UIViewController()
+    func open(category: String, products: [Product]) {
+        let vc = CategoryAssembler.make(products: products)
         vc.title = category
-        vc.view.backgroundColor = .systemBackground
         root?.navigationController?.pushViewController(vc, animated: true)
     }
 }
