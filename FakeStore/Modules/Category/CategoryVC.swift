@@ -12,6 +12,7 @@ import SnapKit
 
 protocol CategoryViewModel {
     var products: BehaviorSubject<[Product]> { get }
+    var selectedProduct: PublishSubject<Product> { get }
 }
 
 final class CategoryVC: UIViewController {
@@ -45,10 +46,20 @@ final class CategoryVC: UIViewController {
     }
     
     private func bind() {
-        viewModel.products.bind(to: collection.rx.items(cellIdentifier: "\(SingleCategoryCell.self)", cellType: SingleCategoryCell.self)) { row, element, cell in
+        viewModel.products
+            .bind(to: collection.rx.items(
+                cellIdentifier: "\(SingleCategoryCell.self)",
+                cellType: SingleCategoryCell.self)) { row, element, cell in
             cell.config(with: element)
         }
         .disposed(by: bag)
+        
+        collection.rx.itemSelected
+            .withLatestFrom(viewModel.products) { index, elements in
+                elements[index.row]
+            }
+            .bind(to: viewModel.selectedProduct)
+            .disposed(by: bag)
     }
     
     private func setupUI() {

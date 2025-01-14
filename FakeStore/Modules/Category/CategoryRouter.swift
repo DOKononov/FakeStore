@@ -10,7 +10,9 @@ import UIKit
 final class CategoryRouter: CategoryRouterProtocol {
     weak var root: UIViewController?
     
-    func open(product: Product) {
-        
+    func show(product: Product) {
+        let vc = ProductPreviewAssembler.make(product: product)
+        root?.navigationController?.pushViewController(vc, animated: true)
     }
+
 }
